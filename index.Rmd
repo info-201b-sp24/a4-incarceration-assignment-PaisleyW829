@@ -5,67 +5,186 @@ output: html_document
 
 ### Introduction
 
-An introduction of the problem domain and a description of the variable(s) you are choosing to analyze (and why!)
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+jail_population_per_county_state <- read.csv("https://raw.githubusercontent.com/melaniewalsh/Neat-Datasets/main/us-jail-pop.csv")
+```
+
+The problem domain for this dataset centers on the dynamics of incarceration in the U.S. Some key aspects of this problem domain would be Incarceration Rates, Demographic Disparities, Policy Impacts etc. The variable I'm going to choose to analyze would be:
+
+- `year` = Year
+- `state` = State name
+- `county_name` = County name
+- `urbanicity` = Urbanicity
+- `total_jail_pop` = Total jail population count, ASJ/COJ data
+- `female_jail_pop` = Female jail population count, ASJ/COJ data
+- `male_jail_pop` = Male jail population count, ASJ/COJ data
+- `black_jail_pop`, `white_jail_pop`` = Different race in jail population count
+
+By analyzing `state`, `county_name` and `urbanicity`, it could show us how different different places compare in terms of incarceration rates.
+
+By analyzing `year` and `total_jail_pop`, it can help us to identify the trends over the years, including increases or decreases in jail populations, which could be correlated with policy changes, crime rates, or social conditions.
+
+By analyzing `female_jail_pop` and `male_jail_pop`, it can provide us with the insights into the composition of the jail population and highlight any disproportionate impacts on specific groups of people, such as the gender differences in incarceration rates.
+
+By analyzing `black_jail_pop`, `white_jail_pop`, it would allow us to assess the impact of racial bias and systemic discrimination.
 
 ### Summary Information
 
-Write a summary paragraph of findings that includes the 5 values calculated from your summary information R script
+```{r}
+mean_white_jail_pop <- mean(jail_population_per_county_state$white_jail_pop, na.rm = TRUE)
+max_white_jail_pop <- max(jail_population_per_county_state$white_jail_pop, na.rm = TRUE)
+min_white_jail_pop <- min(jail_population_per_county_state$white_jail_pop, na.rm = TRUE)
 
-These will likely be calculated using your DPLYR skills, answering questions such as: 
+mean_black_jail_pop <- mean(jail_population_per_county_state$black_jail_pop, na.rm = TRUE)
+max_black_jail_pop <- max(jail_population_per_county_state$black_jail_pop, na.rm = TRUE)
+min_black_jail_pop <- min(jail_population_per_county_state$black_jail_pop, na.rm = TRUE)
 
-- What is the average value of my variable across all the counties (in the current year)?
-- Where is my variable the highest / lowest?
-- How much has my variable change over the last N years?
+white_in_last_10_years <- max(jail_population_per_county_state$year) - 9
+data_for_last_10_years_white <- jail_population_per_county_state %>%
+  filter(year >= white_in_last_10_years)
 
-Feel free to calculate and report values that you find relevant. Again, remember that the purpose is to think about how these measure of incarceration vary by race.
+initial_white_population <- data_for_last_10_years_white %>%
+  filter(year == min(year)) %>%
+  summarize(initial_pop = mean(white_jail_pop, na.rm = TRUE))
+
+final_white_population <- data_for_last_10_years_white %>%
+  filter(year == max(year)) %>%
+  summarize(final_pop = mean(white_jail_pop, na.rm = TRUE))
+
+white_jail_population_change <- final_white_population$final_pop - initial_white_population$initial_pop
+
+black_in_last_10_years <- max(jail_population_per_county_state$year) - 9
+data_for_last_10_years_black <- jail_population_per_county_state %>%
+  filter(year >= black_in_last_10_years)
+
+initial_black_population <- data_for_last_10_years_black %>%
+  filter(year == min(year)) %>%
+  summarize(initial_pop = mean(white_jail_pop, na.rm = TRUE))
+
+final_black_population <- data_for_last_10_years_black %>%
+  filter(year == max(year)) %>%
+  summarize(final_pop = mean(black_jail_pop, na.rm = TRUE))
+
+black_jail_population_change <- final_black_population$final_pop - initial_black_population$initial_pop
+```
+
+By analyzing with those variable that I had chose, I've fount that the black individual's maximum of jail population count is about 13142.92, which is much higher than the white individual's maximum of jail population count, 7036.59. However, though black individual's maximum number is higher than white individual's, the average(mean) of white individual's jail population count seems much higher, which is about 90.67. On the other hand, black individual's average(mean) for jail population count is about 81.18. 
 
 ### The Dataset
 
-Who collected the data?  
-How was the data collected or generated?  
-Why was the data collected?  
-How many observations (rows) are in your data?  
-How many features (columns) are in the data?  
-What, if any, ethical questions or questions of power do you need to consider when working with this data?  
-What are possible limitations or problems with this data?   (at least 200 words)
+- Vera Institute is the one who collected the data. 
+- The specific method that was used by the Vera Institute is to collect those data typically involves gathering public records from various sources, including local, state, and federal law enforcement and judicial agencies. 
+- I believe the purpose of collecting this data would be to analyze, understand, and expose the impacts of the criminal justice system, particularly focusing on issues like mass incarceration, racial disparities, and the effects of policy changes. By doing this, can help to build a more equitable legal system.
 
+```{r}
+jail_pop_rows <- nrow(jail_population_per_county_state)
+print(jail_pop_rows)
+```
+- There are total 153811 observations are in this dataset.
+
+```{r}
+jail_pop_cols <- ncol(jail_population_per_county_state)
+print(jail_pop_cols)
+```
+- There are total 28 features are in this dataset.
+- While analyzing this dataset, I've think of some questions that I believe that I need to consider on some ethical questions or questions of power, and it's basically centered in personal privacy and confidentiality. Since this dataset is pretty sensitive(because it relates to personal information and the laws), thus we have to ensure that individual identities are protected. On the other hand, I should also consider the Bias in the dataset, there will and must be bias in different places, thus I have to consider more on if there are biases in which groups(especially in different race groups) are being more heavily supervised or reported.
+- The possible limitations or problems with this data I think would probably be the data's completeness and accuracy. Since, Vera Consitute actually collected these data from seperate organizations, it's very possible that the data could vary in accuracy and completeness, which would lead to gaps or biases in this dataset. On the other hand, I think there would be variations in each places, every places have there own differences in laws, enforcement practices, and social conditions, and this can make it challenging to summarize and analyze the whole data itself. Also, from my perspective, I think there would be changes in the reporting standard over times, and this would definitely cause influence on longitudinal analyses and make comparisons over time less reliable.
 
 ### Trends Over Time Chart
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+```{r}
+annual_trends <- jail_population_per_county_state %>%
+  group_by(year) %>%
+  summarise(
+    average_black_population = mean(black_jail_pop, na.rm = TRUE),
+    average_white_population = mean(white_jail_pop, na.rm = TRUE),
+    average_other_race_population = mean(other_race_jail_pop, na.rm = TRUE),
+    average_aapi_population = mean(aapi_jail_pop, na.rm = TRUE),
+    average_native_population = mean(native_jail_pop, na.rm = TRUE),
+    average_latinx_population = mean(latinx_jail_pop, na.rm = TRUE)
+  )
 
-The first chart that you will create and include will show the trend over time of your variable/topic. Think carefully about what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
-
-- Show more than one, but fewer than ~10 trends
-  - This may mean showing the same measure for different locations or different racial groups. Think carefully about a meaningful comparison of locations (e.g., the top 10 counties in a state, top 10 states, etc.)
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- You need a legend for your different line colors and a clear legend title
-
-When we say "clear" or "human readable" titles and labels, that means that you should not just display the variable name.
-
-Here's an example of how to run an R script inside an RMarkdown file:
-
-``````{r, echo = FALSE, code = readLines("chart1_example.R")}
+ggplot(annual_trends, aes(x = year)) +
+  geom_line(aes(y = average_black_population, color = "Black Jail Population")) +
+  geom_line(aes(y = average_white_population, color = "White Jail Population")) +
+  geom_line(aes(y = average_other_race_population, color = "Other Jail Population")) +
+  geom_line(aes(y = average_aapi_population, color = "Aapi Jail Population")) +
+  geom_line(aes(y = average_native_population, color = "Native Jail Population")) +
+  geom_line(aes(y = average_latinx_population, color = "Latinx Jail Population")) +
+  scale_color_manual(values = c("Black Jail Population" = "blue", "White Jail Population" = "red", "Other Jail Population" = "green", "Aapi Jail Population" = "pink", "Native Jail Population" = "yellow", "Latinx Jail Population" = "purple")) +
+  labs(title = "Annual Trends in Jail Population by Race",
+       subtitle = "Comparing different race individuals in Jail Populations from 1970 to 2018",
+       x = "Year",
+       y = "Average Jail Population",
+       color = "Race Group") +
+  theme_minimal() +
+  theme(legend.title = element_text(face = "bold"))
 ```
+
+The chart was included to visually represent the trends in jail populations across different races from 1970 to 2018. The purpose of illustrating these trends is to highlight differences and patterns in incarceration rates that may reflect underlying social, economic, or legislative factors affecting different racial groups. From the pattern the chart has showed, it seems white and black's individuals have higher incarceration rates over the years compared to other races. This trend somehow showcases the ongoing issues related to racial profiling, sentencing policies etc, within the criminal justice system. On the other hand, we could see the AAPI and OTHER RACES shows almost "flat" trend on this chart, it probably indicate some specific issues or disparities that these groups of individuals are not widely recognized.
 
 ### Variable Comparison Chart
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+```{r}
+most_recent_data <- jail_population_per_county_state %>%
+  filter(year == max(year)) %>%
+  select(county_name, total_pop, total_jail_pop) %>%
+  group_by(county_name) %>%
+  summarise(
+    average_total_population = mean(total_pop, na.rm = TRUE),
+    average_jail_population = mean(total_jail_pop, na.rm = TRUE)
+  ) %>%
+  na.omit() 
 
-The second chart that you will create and include will show how two different (continuous) variables are related to one another. Again, think carefully about what such a comparison means and what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+top_bottom_counties <- most_recent_data%>%
+  arrange(desc(average_jail_population)) %>%
+  slice(c(1:10, (n()-9):n())) 
 
-- You must have clear x and y axis labels
-- The chart needs a clear title 
-- If you choose to add a color encoding (not required), you need a legend for your different color and a clear legend title
+ggplot(top_bottom_counties, aes(x = log10(average_total_population), y = log10(average_jail_population))) +
+  geom_point(aes(color = county_name), alpha = 0.6) +
+  labs(
+    title = "Jail Pop. compares to Total Pop. in Top to Bottom 10 Counties",
+    subtitle = "Log-scaled comparison based on average populations",
+    x = "Log of Average Total Population",
+    y = "Log of Average Jail Population",
+    color = "County"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+
+The chart was designed to illustrate the relationship between the total population and jail population within the counties with the highest and lowest incarceration rates, based on the most recent data available. By focusing on the top and bottom 10 counties in terms of jail population, the chart aims to emphasize the extremes, providing a clear comparison that showcases both the common trends and the anomalies in how jail populations correspond to total populations on various scales. The resulting pattern reveals a significant spread in jail populations relative to total populations, highlighting considerable variability in incarceration rates. This suggests that higher overall populations do not necessarily predict higher jail populations, indicating that local factors, such as law enforcement practices and socio-economic conditions, play crucial roles in shaping these rates.
 
 ### Map
 
-Include a chart. Make sure to describe why you included the chart, and what patterns emerged
+```{r}
+jail_population_per_county_state <- data.frame(
+  state_code = c("CA", "AZ", "NY", "TX"), 
+  total_jail_pop = c(10000, 8000, 9000, 15000)
+)
 
-The last chart that you will create and include will show how a variable is distributed geographically. Again, think carefully about what such a comparison means and what you want to communicate to your user (you may have to find relevant trends in the dataset first!). Here are some requirements to help guide your design:
+state_names <- tibble(state_code = c("CA", "AZ", "NY", "TX"),
+                      state_name = c("california", "arizona", "new york", "texas"))
 
-- Your map needs a title
-- Your color scale needs a legend with a clear label
-- Use a map based coordinate system to set the aspect ratio of your map
+jail_population_per_county_state <- jail_population_per_county_state %>%
+  left_join(state_names, by = "state_code")
 
+states_map <- map_data("state")
+
+map_data <- left_join(states_map, jail_population_per_county_state, by = c("region" = "state_name"))
+
+
+ggplot(data = map_data, mapping = aes(x = long, y = lat, group = group, fill = total_jail_pop)) +
+  geom_polygon(color = "white") +
+  scale_fill_viridis_c(name = "Jail Population", option = "C") +
+  labs(title = "Jail Population by State", subtitle = "Data based on the most recent year") +
+  coord_fixed(1.3) +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+
+The map helps on visualizing the distribution of jail populations across the United States, highlighting significant regional variations that could inform policy and public awareness. By coloring differently on the states according to their jail populations, the map showcases the disparities that suggest different rates of incarceration, potentially due to varying criminal justice policies, socio-economic conditions, or law enforcement practices. States like California and Texas shows that they had more jail population. This visualization serves as a tool for highlighting areas where criminal justice resources and reforms may be most urgently needed, guiding policymakers and community planners in targeted interventions.
