@@ -22,7 +22,7 @@ The problem domain for this dataset centers on the dynamics of incarceration in 
 - `total_jail_pop` = Total jail population count, ASJ/COJ data
 - `female_jail_pop` = Female jail population count, ASJ/COJ data
 - `male_jail_pop` = Male jail population count, ASJ/COJ data
-- `black_jail_pop`, `white_jail_pop`` = Different race in jail population count
+- `black_jail_pop`, `white_jail_pop` = Different race in jail population count
 
 By analyzing `state`, `county_name` and `urbanicity`, it could show us how different different places compare in terms of incarceration rates.
 
@@ -72,7 +72,48 @@ final_black_population <- data_for_last_10_years_black %>%
 black_jail_population_change <- final_black_population$final_pop - initial_black_population$initial_pop
 ```
 
-By analyzing with those variable that I had chose, I've fount that the black individual's maximum of jail population count is about 13142.92, which is much higher than the white individual's maximum of jail population count, 7036.59. However, though black individual's maximum number is higher than white individual's, the average(mean) of white individual's jail population count seems much higher, which is about 90.67. On the other hand, black individual's average(mean) for jail population count is about 81.18. 
+By analyzing with those variable that I had chose, I've found that the black individual's maximum of jail population count is about 13142.92, which is much higher than the white individual's maximum of jail population count, 7036.59. However, though black individual's maximum number is higher than white individual's, the average(mean) of white individual's jail population count seems much higher, which is about 90.67. On the other hand, black individual's average(mean) for jail population count is about 81.18. One possible reason I think could explain this would be there is a larger overall population of White individuals contributes to a higher mean, as more counties have predominantly White populations, which statistically affects the average. Also the change in black and white individuals jail population also surprised me, it shows that the change in white jail population is 4.296913, and the change in black jail population is -28.96264. 
+
+```{r}
+mean_female_jail_pop <- mean(jail_population_per_county_state$female_jail_pop, na.rm = TRUE)
+max_female_jail_pop <- max(jail_population_per_county_state$female_jail_pop, na.rm = TRUE)
+min_female_jail_pop <- min(jail_population_per_county_state$female_jail_pop, na.rm = TRUE)
+
+mean_male_jail_pop <- mean(jail_population_per_county_state$male_jail_pop, na.rm = TRUE)
+max_male_jail_pop <- max(jail_population_per_county_state$male_jail_pop, na.rm = TRUE)
+min_male_jail_pop <- min(jail_population_per_county_state$male_jail_pop, na.rm = TRUE)
+
+female_in_last_10_years <- max(jail_population_per_county_state$year) - 9
+data_for_last_10_years_female <- jail_population_per_county_state %>%
+  filter(year >= female_in_last_10_years)
+
+initial_female_population <- data_for_last_10_years_female %>%
+  filter(year == min(year)) %>%
+  summarize(initial_pop = mean(female_jail_pop, na.rm = TRUE))
+
+final_female_population <- data_for_last_10_years_female %>%
+  filter(year == max(year)) %>%
+  summarize(final_pop = mean(female_jail_pop, na.rm = TRUE))
+
+female_jail_population_change <- final_female_population$final_pop - initial_female_population$initial_pop
+
+male_in_last_10_years <- max(jail_population_per_county_state$year) - 9
+data_for_last_10_years_male <- jail_population_per_county_state %>%
+  filter(year >= male_in_last_10_years)
+
+initial_male_population <- data_for_last_10_years_male %>%
+  filter(year == min(year)) %>%
+  summarize(initial_pop = mean(male_jail_pop, na.rm = TRUE))
+
+final_male_population <- data_for_last_10_years_male %>%
+  filter(year == max(year)) %>%
+  summarize(final_pop = mean(male_jail_pop, na.rm = TRUE))
+
+male_jail_population_change <- final_male_population$final_pop - initial_male_population$initial_pop
+
+```
+
+From the calculated data given above, we could easily find that female has a much lower mean in the jail population than male, which is about 18.21043, and male has 143.6055. And also the maximum both gender provides is largely different, female has the data with the maximum number of 2897.41, on the other hand, male has 20288.14. Also as the calculation between the maximum and the minimum for both gender, we could find that female's change in jail population is about 3.056593, and surprisingly the male's change in jail population is -17.76798, which means male's jail population is decreasing over times. 
 
 ### The Dataset
 
